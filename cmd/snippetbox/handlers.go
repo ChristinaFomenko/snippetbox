@@ -1,7 +1,7 @@
 package main
 
 import (
-	fmt "fmt"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -21,18 +21,27 @@ func home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ts, err := template.ParseFiles(".ui/html/home_page_tmpl")
+	files := []string{
+		"./ui/html/home_page_tmpl",
+		"./ui/html/base_layout_tmpl",
+		"./ui/html/footer_partial_tmpl",
+	}
+
+	ts, err := template.ParseFiles(files...) //Используем функцию template.ParseFiles() для чтения файла шаблона.
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 	}
 
 	err = ts.Execute(w, nil)
+	// Затем мы используем метод Execute() для записи содержимого
+	// шаблона в тело HTTP ответа. Последний параметр в Execute() предоставляет
+	// возможность отправки динамических данных в шаблон.
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 	}
-	w.Write([]byte("Привет из Snippetbox!"))
+	//w.Write([]byte("Привет из Snippetbox!"))
 }
 
 //Обработчик для отображения содержимого
