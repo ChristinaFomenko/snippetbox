@@ -1,12 +1,29 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 )
 
 func main() {
+	addr := flag.String("addr", ":4000", "Сетевой адрес HTTP")
+	//flag.Parse() для извлечения флага из командной строки.
+	flag.Parse()
+	//созд логера для записи инфо
+
+	//можно осущ.логирование в папку
+	//f, err := os.OpenFile("info.log", os.O_RDWR|os.O_CREATE, 0666)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//defer f.Close()
+	//infoLog := log.New(f, "INFO\t", log.Ldate|log.Ltime)
+
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", home)
 	mux.HandleFunc("/snippet", showSnippet)
@@ -15,10 +32,14 @@ func main() {
 	fileServer := http.FileServer(neuteredFileSystem{http.Dir("./ui/static/")})
 	mux.Handle("/static", http.NotFoundHandler())
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-
-	log.Println("Запуск сервера на http://127.0.0.1:4000")
-	err := http.ListenAndServe(":4000", mux)
-	log.Fatal(err)
+	srv := &http.Server{
+		Addr:     *addr,
+		ErrorLog: errorLog,
+		Handler:  mux,
+	}
+	infoLog.Printf("Запуск сервера на http://127.0.0.1%s", *addr)
+	err := srv.ListenAndServe()
+	errorLog.Fatal(err)
 }
 
 type neuteredFileSystem struct {
