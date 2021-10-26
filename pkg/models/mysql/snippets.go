@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"database/sql"
-	"github.com/ChristinaFomenko/pkg/models"
+	"github.com/ChristinaFomenko/snippetbox/pkg/models"
 )
 
 type SnippetModel struct {

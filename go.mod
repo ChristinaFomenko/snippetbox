@@ -1,4 +1,4 @@
-module github.com/ChristinaFomenko
+module github.com/ChristinaFomenko/snippetbox
 
 go 1.16
 
