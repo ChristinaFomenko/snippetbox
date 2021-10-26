@@ -8,6 +8,11 @@ import (
 	"path/filepath"
 )
 
+type application struct {
+	errorLog *log.Logger
+	infoLog  *log.Logger
+}
+
 func main() {
 	addr := flag.String("addr", ":4000", "Сетевой адрес HTTP")
 	//flag.Parse() для извлечения флага из командной строки.
@@ -24,10 +29,16 @@ func main() {
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+	app := &application{
+		errorLog: errorLog,
+		infoLog:  infoLog,
+	}
+
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet", showSnippet)
-	mux.HandleFunc("/snippet/create", createSnippet)
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet", app.showSnippet)
+	mux.HandleFunc("/snippet/create", app.createSnippet)
 
 	fileServer := http.FileServer(neuteredFileSystem{http.Dir("./ui/static/")})
 	mux.Handle("/static", http.NotFoundHandler())
@@ -67,31 +78,3 @@ func (nfs neuteredFileSystem) Open(path string) (http.File, error) {
 
 	return f, nil
 }
-
-//import (
-//	"log"
-//	"net/http"
-//)
-//
-//func main() {
-//	// Используется функция http.NewServeMux() для инициализации нового роутера, затем
-//	// функцию "home" регистрируется как обработчик для URL-шаблона "/".
-//	mux := http.NewServeMux()
-//	mux.HandleFunc("/", home)
-//	//регистрируем 2 новых обработчика и соотв url-шаблоны в маршрутизаторе servemux
-//	mux.HandleFunc("/snippet", showSnippet)
-//	mux.HandleFunc("/snippet/create", createSnippet)
-//
-//	// Инициализируем FileServer, он будет обрабатывать
-//	// HTTP-запросы к статическим файлам из папки "./ui/static".
-//	// Обратите внимание, что переданный в функцию http.Dir путь
-//	// является относительным корневой папке проекта
-//	fileServer := http.FileServer(http.Dir("./ui/static/"))
-//	// Используем функцию mux.Handle() для регистрации обработчика для
-//	// всех запросов, которые начинаются с "/static/". Мы убираем
-//	// префикс "/static" перед тем как запрос достигнет http.FileServer
-//	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-//	log.Println("Запуск веб-сервера на http://127.0.0.1:4000")
-//	err := http.ListenAndServe(":4000", mux)
-//	log.Fatal(err)
-//}

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -11,13 +10,13 @@ import (
 //созд. функция обработчик "home", которая записывает байтовый слайс
 //текст "..." как тело ответа
 //обработчик главной страницы
-func home(w http.ResponseWriter, r *http.Request) {
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// Проверяется, если текущий путь URL запроса точно совпадает с шаблоном "/". Если нет, вызывается
 	// функция http.NotFound() для возвращения клиенту ошибки 404.
 	// Важно, чтобы мы завершили работу обработчика через return. Если мы забудем про "return", то обработчик
 	// продолжит работу и выведет сообщение
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+		app.notFound(w)
 		return
 	}
 
@@ -29,7 +28,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 	ts, err := template.ParseFiles(files...) //Используем функцию template.ParseFiles() для чтения файла шаблона.
 	if err != nil {
-		log.Println(err.Error())
+		app.serverError(w, err)
 		http.Error(w, "Internal Server Error", 500)
 	}
 
@@ -38,21 +37,21 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// шаблона в тело HTTP ответа. Последний параметр в Execute() предоставляет
 	// возможность отправки динамических данных в шаблон.
 	if err != nil {
-		log.Println(err.Error())
+		app.serverError(w, err)
 		http.Error(w, "Internal Server Error", 500)
 	}
 	//w.Write([]byte("Привет из Snippetbox!"))
 }
 
 //Обработчик для отображения содержимого
-func showSnippet(w http.ResponseWriter, r *http.Request) {
+func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 	// Извлекаем значение параметра id из URL и попытаемся
 	// конвертировать строку в integer используя функцию strconv.Atoi(). Если его нельзя
 	// конвертировать в integer, или значение меньше 1, возвращаем ответ
 	// 404 - страница не найдена!
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
-		http.NotFound(w, r)
+		app.notFound(w)
 		return
 	}
 
@@ -60,7 +59,7 @@ func showSnippet(w http.ResponseWriter, r *http.Request) {
 }
 
 //обраб для создания новой заметки
-func createSnippet(w http.ResponseWriter, r *http.Request) {
+func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	// Используем r.Method для проверки, использует ли запрос метод POST или нет. Обратите внимание,
 	// что http.MethodPost является строкой и содержит текст "POST".
 	if r.Method != http.MethodPost {
@@ -69,7 +68,7 @@ func createSnippet(w http.ResponseWriter, r *http.Request) {
 		// второй параметр - значение заголовка.
 		w.Header().Set("Allow", http.MethodPost)
 		// Используем функцию http.Error() для отправки кода состояния 405
-		http.Error(w, "Метод запрещен!", 405)
+		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
 	w.Write([]byte("Форма создания новой заметки..."))
