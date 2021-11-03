@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"github.com/ChristinaFomenko/pkg/models/mysql"
+	mysql2 "github.com/ChristinaFomenko/snippetbox/pkg/models/mysql"
 	"log"
 	"net/http"
 	"os"
@@ -15,7 +15,7 @@ import (
 type application struct {
 	errorLog *log.Logger
 	infoLog  *log.Logger
-	snippets *mysql.SnippetModel
+	snippets *mysql2.SnippetModel
 }
 
 func main() {
@@ -46,7 +46,7 @@ func main() {
 	app := &application{
 		errorLog: errorLog,
 		infoLog:  infoLog,
-		snippets: &mysql.SnippetModel{DB: db},
+		snippets: &mysql2.SnippetModel{DB: db},
 	}
 
 	srv := &http.Server{

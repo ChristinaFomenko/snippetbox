@@ -1,8 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"github.com/ChristinaFomenko/snippetbox/pkg/models/mysql"
+	"github.com/ChristinaFomenko/snippetbox/pkg/models"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -56,7 +57,17 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Отображение выбранной заметки с ID %d", id)
+	s, err := app.snippets.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(w)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	fmt.Fprintf(w, "Отображение выбранной заметки с ID %v", s)
 }
 
 //обраб для создания новой заметки
