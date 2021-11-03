@@ -22,6 +22,16 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s, err := app.snippets.Latest()
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	for _, snippet := range s {
+		fmt.Fprintf(w, "%v\n", snippet)
+	}
+
 	files := []string{
 		"./ui/html/home_page_tmpl",
 		"./ui/html/base_layout_tmpl",
