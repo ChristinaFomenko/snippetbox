@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {
@@ -23,17 +21,7 @@ type application struct {
 func main() {
 	addr := flag.String("addr", ":4000", "Сетевой адрес HTTP")
 	dsn := flag.String("dsn", "snippetbox:password@/snippetbox?parseTime=true", "Название MySQL источника данных")
-	//flag.Parse() для извлечения флага из командной строки.
 	flag.Parse()
-	//созд логера для записи инфо
-
-	//можно осущ.логирование в папку
-	//f, err := os.OpenFile("info.log", os.O_RDWR|os.O_CREATE, 0666)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//defer f.Close()
-	//infoLog := log.New(f, "INFO\t", log.Ldate|log.Ltime)
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)

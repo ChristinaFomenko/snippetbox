@@ -24,7 +24,7 @@ func (app *application) notFound(w http.ResponseWriter) {
 func (app *application) render(w http.ResponseWriter, r *http.Request, name string, td *templateData) {
 	ts, ok := app.templateCache[name]
 	if !ok {
-		app.serverError(w, fmt.Errorf("Шаблон %s не существует!", name))
+		app.serverError(w, fmt.Errorf("schema %s doesn't exist", name))
 		return
 	}
 
